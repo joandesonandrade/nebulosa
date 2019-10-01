@@ -14,6 +14,8 @@
 
 [Scikit-Learn - Framework com vários algoritmos feitos para Aprendizado de Máquina](https://scikit-learn.org/stable/)
 
+[Keras - Framework com vários algoritmos feitos para Apredizagem de Máquina](https://keras.io/)
+
 [Netfilter Iptables - Firewall nativo no linux](https://netfilter.org/projects/iptables/index.html)
 
 [Jupyter - Laboratório de desenvolvimento](https://jupyter.org/)

@@ -12,7 +12,7 @@
 
 [NumPy - Framework para manipulação de dados, usando matrizes n-dimensionais](https://numpy.org/)
 
-[Netfilter Iptables - Firewall nativo no linux](https://netfilter.org/)
+[Netfilter Iptables - Firewall nativo no linux](https://netfilter.org/projects/iptables/index.html)
 
 [Curso grátis de Aprendizado de Máquina](http://deeplearningbook.com.br)
 

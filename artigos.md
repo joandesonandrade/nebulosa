@@ -1,1 +1,3 @@
+(DETECCÃO DE ANOMALIAS EM FLUXOS DE REDES DECOMPUTADORES UTILIZANDO TÉCNICAS DE REDES NEURAIS EESTIMADORES LINEARES)[https://github.com/joandesonandrade/estudo-de-machine-learning/blob/master/artigos/DETECC%C3%83O%20DE%20ANOMALIAS%20EM%20FLUXOS%20DE%20REDES%20DECOMPUTADORES%20UTILIZANDO%20T%C3%89CNICAS%20DE%20REDES%20NEURAIS%20EESTIMADORES%20LINEARES.pdf]
 
+(Aprendizagem de Máquina para Segurança em Redes de Computadores: Métodos e Aplicações)[https://github.com/joandesonandrade/estudo-de-machine-learning/blob/master/artigos/Aprendizagem%20 de%20 Máquina%20 para%20 Segurança%20 em Redes de Computadores: Métodos e Aplicações.pdf]

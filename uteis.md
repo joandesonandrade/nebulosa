@@ -14,6 +14,8 @@
 
 [Netfilter Iptables - Firewall nativo no linux](https://netfilter.org/projects/iptables/index.html)
 
+[Jupyter - Laboratório de desenvolvimento](https://jupyter.org/)
+
 [Curso grátis de Aprendizado de Máquina](http://deeplearningbook.com.br)
 
 [Meu repositório com estudos relacionados a Aprendizado de Máquina](https://github.com/joandesonandrade/estudo-de-machine-learning)

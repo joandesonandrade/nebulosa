@@ -12,6 +12,8 @@
 
 [NumPy - Framework para manipulação de dados, usando matrizes n-dimensionais](https://numpy.org/)
 
+[Netfilter Iptables - Firewall nativo no linux](https://netfilter.org/)
+
 [Curso grátis de Aprendizado de Máquina](http://deeplearningbook.com.br)
 
 [Meu repositório com estudos relacionados a Aprendizado de Máquina](https://github.com/joandesonandrade/estudo-de-machine-learning)

@@ -4,12 +4,14 @@
 
 [Socket.IO - Famework em javascript para utilização de socket em client-side, diretamente do browser.](https://socket.io/)
 
-[Curso grátis de Aprendizado de Máquina](http://deeplearningbook.com.br)
+[PcaPY - Framework baseado no pcaplib library, utilizado para análise em um fluxo de redes](https://pypi.org/project/pcapy/)
 
 [Flask - Framework para subir um simples serviço web](https://palletsprojects.com/p/flask/)
 
 [Pandas - Framework para análise de dados do tipo CSV](https://pandas.pydata.org/)
 
 [NumPy - Framework para manipulação de dados, usando matrizes n-dimensionais](https://numpy.org/)
+
+[Curso grátis de Aprendizado de Máquina](http://deeplearningbook.com.br)
 
 [Meu repositório com estudos relacionados a Aprendizado de Máquina](https://github.com/joandesonandrade/estudo-de-machine-learning)

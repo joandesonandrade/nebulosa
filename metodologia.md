@@ -29,3 +29,13 @@ Baseado nos artigos referências, foi escolhidos algumas formas de processamento
 3. Porta destino;
 4. Porta de origem;
 5. Tamanho do pacote;
+
+## Interface de Usuário
+### Gráfico
+O gráfico será desenvolvido em formato Time Line & Area: Framework em javascript disponível no arquivo uteis.md
+
+### API
+A API do lado do cliente será desenvolvido usando websocket com o framework em javascript disponível no arquivo uteis.md
+
+### Backend
+O software principal irá interceptar o tráfego, trata-lo, e irá submeter o analisador de anomalias, caso alguma anomalia seja encontrada, essa informação será salva em um arquivo de anomalias, essa informação irá passar pelo classificador quando for constado um ataque real, é aplicado regras iptables para bloquear o acesso. E todos os dados serão enviados para o lado do cliente conectado com o socket onde irá exibir os resultados.

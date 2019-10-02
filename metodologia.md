@@ -10,9 +10,16 @@ Baseado nos artigos referências, os dados coletados devem ser oriundos de tráf
 | Maliciosa | 20% |
 
 ### Modelos
-Baseado nos artigos referências, foi escolhido os melhores modelos para essa tarefa, estão listadas na tabela abaixa.
+Baseado nos artigos referências, foi escolhido os melhores modelos para essa tarefa, estão listados na tabela abaixa:
 
 | Nome do modelo | Descrição |
 |:-----------------------------:|:---------------------------------------------------------------------------:|
 | RNN-LSTM | A LSTM é uma arquitetura de rede neural recorrente (RNN) que “lembra” valores em intervalos arbitrários. A LSTM é bem adequada para classificar, processar e prever séries temporais com intervalos de tempo de duração desconhecida. A insensibilidade relativa ao comprimento do gap dá uma vantagem à LSTM em relação a RNNs tradicionais (também chamadas “vanilla”), Modelos Ocultos de Markov (MOM) e outros métodos de aprendizado de sequências. |
 | Naive Bayes | O Naive Bayes é um algoritmo probabilístico simples baseado no teorema de Bayes, este utiliza dados de treino para formar um modelo probabilístico baseado na evidência das features nos dados. Atualmente, o algoritmo se tornou popular na área de Aprendizado de Máquina (Machine Learning) para categorizar textos baseado na frequência das palavras usadas, e assim pode ser usado para identificar se determinado e-mail é um SPAM ou sobre qual assunto se refere determinado texto, por exemplo. |
+
+### Coleta de dados
+1. Dados Normais: os dados normais serão coletados através de um software que irá ouvir o tráfego, e salvará tudo em um arquivo CSV, nessa fase o sistema deverá funcionar normalmente, esses dados servirão de referência para a IA.
+2. Dados Maliciosos: os dados maliciosos serão coletados em um ambiente controlado no caso uma VM, da mesma forma que o tráfego normal, porém ela servirá para treinar o modelo de classificação de ataque.
+
+### Processamento dos dados
+Baseado nos artigos referências, foi escolhidos algumas formas de processamento dos dados coletados, após 

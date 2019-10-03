@@ -1,0 +1,1 @@
+# Diretório destinado a todos os arquivos do front-end

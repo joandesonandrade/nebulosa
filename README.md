@@ -1,4 +1,5 @@
 # Detecção de anomalias em uma redes utilizando inteligência artificial
+
 Com a evolução acentuada das soluções de comunicação e arquitetura na área de redes de
 computadores, em parte devido ao crescimento e importância comercial da Internet, há um natural
 aumento da probabilidade de falhas sistêmicas e do crescimento exponencial das atividades
@@ -16,3 +17,10 @@ controlado, ambos vinculados por uma API que faz a integração entre si. Por fi
 usuário onde é exibido os resultados dos softwares, um gráfico estilo linha do tempo, Com efeito de
 previsão de um ataque o software pode tomar a decisão de dar drop na conexão, ou até mesmo
 bloquear o acesso.
+
+### Instalar dependências
+python>=3.6
+
+Execute o comando abaixo para instalar as bibliotecas necessárias.
+
+`pip3 install -r requeriments.txt`

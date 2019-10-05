@@ -25,9 +25,9 @@ Baseado nos artigos referências, foi escolhido os melhores modelos para essa ta
 Baseado nos artigos referências, foi escolhidos algumas formas de processamento dos dados coletados:
 
 1. Soma de todos os bytes do payload do pacote, dividido pela porta destino;
-2. Porta destino;
-3. Porta de origem;
-4. Tamanho do pacote;
+2. Tamanho do pacote, dividido pela porta destino;
+3. Porta destino;
+4. Porta de origem;
 5. Protocolo UDP/TCP;
 6. Frequência de acesso.
 

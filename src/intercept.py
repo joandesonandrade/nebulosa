@@ -2,11 +2,13 @@ import datetime
 from threading import Thread
 import pcapy
 from impacket.ImpactDecoder import LinuxSLLDecoder, EthDecoder
+import netifaces as ni
 
 class DecoderThread(Thread):
-    def __init__(self, pcapObj=None, FilePath=None):
+    def __init__(self, pcapObj=None, FilePath=None, Interface=None):
         datalink = pcapObj.datalink()
         self.FilePath = FilePath
+        self.Interface = Interface
         if pcapy.DLT_EN10MB == datalink:
             self.decoder = EthDecoder()
         elif pcapy.DLT_LINUX_SLL == datalink:
@@ -28,49 +30,48 @@ class DecoderThread(Thread):
         p = self.decoder.decode(data)
         ip = p.child()
         tcp = ip.child()
-        try:
-            src = (ip.get_ip_src(), tcp.get_th_sport())
-        except AttributeError:
-            print('Source Port not found')
-        try:
-            dst = (ip.get_ip_dst(), tcp.get_th_dport())
-        except AttributeError:
-            print('Destination Port not found')
-
         payload = self.display_hex(p)
-        # with open(self.FilePath, 'a') as wf:
-        #     wf.write()
-        #     wf.close()
 
         try:
-            sumBytePayload = sum(payload) / dst[1]
-        except UnboundLocalError:
-            sumBytePayload = sum(payload)
-
-        protocol = tcp.protocol
-
-        if protocol is None:
-            return
-
-        try:
-            lenPayload = len(payload) / dst[1]
-        except UnboundLocalError:
-            lenPayload = len(payload)
-
-        try:
-            srcPort = src[1]
-        except UnboundLocalError:
+            srcPort = tcp.get_th_sport()
+        except AttributeError:
             srcPort = 0
 
         try:
-            dstPort = dst[1]
-        except UnboundLocalError:
+            dstPort = tcp.get_th_dport()
+        except AttributeError:
             dstPort = 0
 
-        #print(sumBytePayload, lenPayload)
-        LOGS = str(protocol) + '|' + str(srcPort) + '|' + str(dstPort) + '|' + str(sumBytePayload) + '|' +\
-        str(lenPayload)
-        print(LOGS)
+        if dstPort > 0:
+            sumBytePayload = sum(payload) / dstPort
+            lenPayload = len(payload) / dstPort
+        else:
+            sumBytePayload = sum(payload)
+            lenPayload = len(payload)
+
+        protocol = tcp.protocol
+        io = 1#input
+
+        if protocol is None:#ARP
+            return
+
+        #protocol 17 = UDP
+
+        if protocol == 1:#ICMP
+            if tcp.get_icmp_num_addrs() > 0:
+                io = 0#output
+
+        if protocol == 6:#TCP
+            myAddr = ni.ifaddresses(self.Interface)[ni.AF_INET][0]['addr']
+            if myAddr != ip.get_ip_dst():
+                io = 0#output
+
+        #Protocol|I/O|SrcPort|DstPort|SumPayload|LenPayload
+        LOGS = str(protocol) + '|' + str(io) + '|' + str(srcPort) + '|' + str(dstPort) + '|' + str(sumBytePayload) + '|' +\
+        str(lenPayload) + '\n'
+        with open(self.FilePath, 'a') as wf:
+            wf.write(LOGS)
+            wf.close()
 
 class intercept:
     def __init__(self, type=None, interface=None):
@@ -97,4 +98,4 @@ class intercept:
         self.net = cap.getnet()
         self.mask = cap.getmask()
         self.datalink = cap.datalink()
-        DecoderThread(cap, absolutePathFile).start()
+        DecoderThread(cap, absolutePathFile, self.interface).start()

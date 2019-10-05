@@ -29,7 +29,8 @@ Baseado nos artigos referências, foi escolhidos algumas formas de processamento
 3. Porta destino;
 4. Porta de origem;
 5. Protocolo UDP/TCP/ICMP...;
-6. Frequência de acesso.
+6. Frequência de acesso;
+7. Entrada/Saída.
 
 ## Interface de Usuário
 ### Gráfico

@@ -1,5 +1,7 @@
 # Divisão das atividades
 
+# 1 Etapa
+
 ### Dados
 
 Thalles -> Tráfego normal do servidor

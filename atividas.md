@@ -1,6 +1,6 @@
 # Divisão das atividades
 
-# 1 Etapa
+# 1º Fase
 
 ### Dados
 

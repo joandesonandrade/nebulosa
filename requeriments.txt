@@ -1,4 +1,5 @@
 pcapy
+impacket
 pandas
 numpy
 keras

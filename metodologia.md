@@ -28,7 +28,7 @@ Baseado nos artigos referências, foi escolhidos algumas formas de processamento
 2. Tamanho do pacote, dividido pela porta destino;
 3. Porta destino;
 4. Porta de origem;
-5. Protocolo UDP/TCP;
+5. Protocolo UDP/TCP/ARP/ICMP;
 6. Frequência de acesso.
 
 ## Interface de Usuário

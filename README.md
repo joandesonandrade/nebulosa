@@ -25,6 +25,6 @@ Execute o comando abaixo para instalar as bibliotecas necessárias.
 
 `pip3 install -r requeriments.txt`
 
-Caso o scapy esteja dando erro na instalação instale esses pacotes abaixo
+Caso o scapy esteja dando erro na instalação, instale esses pacotes abaixo.
 
 `sudo apt-get install libpcap-dev libpq-dev python3-dev`

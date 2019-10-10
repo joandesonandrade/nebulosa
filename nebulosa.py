@@ -1,29 +1,21 @@
 from src import intercept
-import sys
+from 
+import argparse
 
 def main():
-    args = sys.argv
 
-    howUse = "your command was invalid. How Use:\n"\
-             "python3 nebulosa.py intercept normal|attack interface(wlp2s0)"
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--intercept", help="--intercept | Intercept traffic", action="store_true")
+    args = parser.parse_args()
 
     it = None
 
-    if len(args) > 1:
-        try:
-            args[1] = args[1]
-            #Setting intercepting method
-            if args[1] == 'intercept':
-                args[2] = args[2]
-                args[3] = args[3]
-                if args[2] == 'normal':
-                    it = intercept.intercept('normal', args[3])
-                elif args[2] == 'attack':
-                    it = intercept.intercept('attack', args[3])
-                else:
-                    print(howUse)
-        except IndexError:
-            print(howUse)
+    if args.intercept:
+        type = input("Enter the intercept type number [ 1- normal / 2- attack]> ")
+        interface = input("Your interface [wlan0/eth0]> ")
+
+        if type is not None and interface is not None:
+            it = intercept.intercept(type=type, interface=interface)
 
     if it is not None:
         it.start()

@@ -1,1 +1,1 @@
-id, payload, frequency, dstport, srcport, protocol
+,protocol,io,srcport,dstport,payload

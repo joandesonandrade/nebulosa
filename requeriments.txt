@@ -2,5 +2,5 @@ pcapy
 impacket
 pandas
 numpy
-keras
+keras==2.1.5
 scikit-learn

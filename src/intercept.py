@@ -75,6 +75,17 @@ class DecoderThread(Thread):
 
 class intercept:
     def __init__(self, type=None, interface=None):
+        try:
+            if int(type) == 1:
+                type = 'normal'
+            elif int(type) == 2:
+                type = 'attack'
+            else:
+                type = 'normal'
+                print('Type was set to normal default.')
+        except ValueError:
+            raise('Invalid type [ Select number 1 to normal or 2 to attack ]')
+
         self.interface = interface
         self.type = type
         self.fileName = None

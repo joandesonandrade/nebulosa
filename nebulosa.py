@@ -27,8 +27,10 @@ def main():
 
     if args.train:
         from src import train
+        #from src import classifier
         type = input("Enter the intercept type number [ 1- normal / 2- attack]> ")
         tr = train.trainer(type=type)
+        #tr = classifier.trainer(type=type)
 
     if tr is not None:
         print(f'Training model... Type={tr.type}')

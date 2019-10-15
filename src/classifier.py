@@ -4,16 +4,12 @@ from sklearn.externals import joblib
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
 import matplotlib.pyplot as plt
-import random as rd
 from sklearn.metrics import accuracy_score
 
 DATA_PATH = 'data/'
 MODEL_PATH = 'model/'
-EPOCHS = 1
-BATCH_SIZE = 60
 
 class trainer:
     def __init__(self, type):
@@ -33,15 +29,21 @@ class trainer:
     def calc_bytes(self, data):
         return len(data) / 1024 / 1024
 
-    def salveModelTo(self):
-        now = datetime.datetime.now()
-        self.timeLog = str(now.day) + "-" + str(now.month) + "-" + str(now.year) + "_" + str(now.hour) + \
-                       ":" + str(now.minute) + ".nebulosa"
-        self.fileName = self.type + "-" + self.timeLog
-        return MODEL_PATH + self.fileName
+    def sort_list(self, X):
+        y = []
+        n = []
+        while (len(y) < len(X)):
+            s = np.random.randint(0, len(X))
+            if s in y:
+                continue
+            print(X[s])
+            n.append(X[s])
+            y.append(s)
+        return n
 
-    def MODEL_NB(self):
-        return GaussianNB()
+
+    def MODEL_KNN(self):
+        return KNeighborsClassifier(n_neighbors=5)
 
 
     def list_files(self):
@@ -71,7 +73,6 @@ class trainer:
         return data, list[int(s)]
 
     def compile(self):
-        self.model_path = self.salveModelTo()
         self.list_files = self.list_files()
         if len(self.list_files) == 0:
             print("Path \"" + DATA_PATH + self.type + "\" is empty")
@@ -82,30 +83,29 @@ class trainer:
 
         self.data = pd.read_csv(DATA_PATH + self.type + '/' + self.data[1]).values.tolist()
 
-        X = [x[1:] for x in self.data]
-        y = [1 for y in self.data]
+        ndata = [[n[1:], [1]] for n in self.data]
 
-        n_features = len(X)
+        n_features = len(ndata)
 
         for i in range(n_features):
-            X.append([X[i][0], X[i][1], rd.randint(0, 999), rd.randint(0, 999), rd.randint(1, 99)])
-            y.append(0)
-            print(X[(len(X) - 1)])
+            ndata.append([[ndata[i][0][0], ndata[i][0][1], np.random.randint(0, 999), np.random.randint(0, 999),
+                           np.random.randint(1, 99)], [0]])
+            print(ndata[(len(ndata) - 1)])
+
+        ndata = self.sort_list(ndata)
+
+        X = [n[0] for n in ndata]
+        y = [n[1] for n in ndata]
 
         X_train, X_test, y_train, y_test = train_test_split(np.array(X, dtype=np.float64),
-                                                            np.array(y, dtype=np.float64),
+                                                            np.array(y, dtype=np.float64).ravel(),
                                                             test_size=0.3,
                                                             random_state=0)
 
+        self.knn = self.MODEL_KNN()
+        self.knn.fit(X=X_train, y=y_train)
 
-        self.nb = self.MODEL_NB()
-        self.nb.fit(X=X, y=y)
+        print("Predict model :", str(accuracy_score(y_test, self.knn.predict(X_test))) + "%")
 
-        print("Predict model :", str(accuracy_score(y_test, self.nb.predict(X_test))) + "%")
-
-        test = np.array([[1, 1, 80, 80, 0.18]], dtype=np.float64)
-
-        print(test)
-
-        pre = self.nb.predict(test)[0]
-        print(pre)
+        joblib.dump(self.knn, MODEL_PATH + 'model.pkl')
+        print(f'Model successfully saved. -> {MODEL_PATH}model.pkl')

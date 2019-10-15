@@ -6,6 +6,7 @@ def main():
     parser.add_argument("--intercept", help="--intercept | Intercept traffic", action="store_true")
     parser.add_argument("--preprocessing", help="--preprocessing | Processing data files", action="store_true")
     parser.add_argument("--train", help="--train | Training the model", action="store_true")
+    parser.add_argument("--predict", help="--predict | Get predict the model", action="store_true")
     args = parser.parse_args()
 
     it = None
@@ -26,11 +27,28 @@ def main():
         pre = preprocessing.processing(type=type)
 
     if args.train:
-        from src import train
-        #from src import classifier
+        #from src import train
+        from src import classifier
         type = input("Enter the intercept type number [ 1- normal / 2- attack]> ")
-        tr = train.trainer(type=type)
-        #tr = classifier.trainer(type=type)
+        #tr = train.trainer(type=type)
+        tr = classifier.trainer(type=type)
+
+    if args.predict:
+        from src import predict_model
+        from random import randint
+
+        pm = predict_model.predict([1, 0, 0, 80, 0.091917591])
+        r = pm.get_result()
+        print(r[0])
+        exit()
+
+        for i in range(50):
+            pm = predict_model.predict([randint(1, 3), randint(0, 1), randint(0, 999), randint(0, 999), randint(0, 999)])
+            r = pm.get_result()
+            if int(r[0]) == 1:
+                print('Tráfego normal', pm.X)
+            else:
+                print('Tráfego anormal', pm.X)
 
     if tr is not None:
         print(f'Training model... Type={tr.type}')

@@ -145,7 +145,8 @@ class trainer:
         history = self.lstm.fit(X_train,
                       y_train,
                       batch_size=BATCH_SIZE,
-                      epochs=EPOCHS)
+                      epochs=EPOCHS,
+                      validation_data=(X_test, y_test))
         score, acc = self.lstm.evaluate(X_test, y_test, batch_size=BATCH_SIZE)
         print(f'acc={acc}%; score={score}')
 
@@ -179,5 +180,5 @@ class trainer:
         #
         # print(np.argmax(predicted))
 
-        self.lstm.save_weights(MODEL_PATH + 'model.h5')
+        self.lstm.save(MODEL_PATH + 'model.h5')
         print(f'Model successfully saved. -> {MODEL_PATH}model.h5')

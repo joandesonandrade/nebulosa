@@ -1,10 +1,10 @@
 import os
-from sklearn.externals import joblib
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
+import pickle
 
 DATA_PATH = 'data/'
 MODEL_PATH = 'model/'
@@ -159,5 +159,7 @@ class trainer:
         print("Predict model: {:.2f}%".format(acc))
 
         if input('Do you want to save the model? (yes/no)> ') == 'yes':
-            joblib.dump(self.knn, MODEL_PATH + 'model.pkl')
+            with open(MODEL_PATH + 'model.pkl', 'wb') as wf:
+                pickle.dump(self.knn, wf)
+                wf.close()
             print(f'Model successfully saved. -> {MODEL_PATH}model.pkl')

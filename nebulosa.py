@@ -37,18 +37,19 @@ def main():
         from src import predict_model
         from random import randint
 
-        pm = predict_model.predict([1, 0, 0, 80, 0.091917591])
-        r = pm.get_result()
-        print(r[0])
-        exit()
-
+        print('Testing data random...')
         for i in range(50):
-            pm = predict_model.predict([randint(1, 3), randint(0, 1), randint(0, 999), randint(0, 999), randint(0, 999)])
+            mydstport = randint(0, 999)
+            mypayload = randint(0, 999)
+            if mydstport > 0:
+                mypayload = mypayload / mydstport
+            pm = predict_model.predict([randint(1, 3), randint(0, 1), randint(0, 999), mydstport, mypayload])
             r = pm.get_result()
             if int(r[0]) == 1:
-                print('Tráfego normal', pm.X)
+                print('normal', pm.X)
             else:
-                print('Tráfego anormal', pm.X)
+                print('anormalies', pm.X)
+
 
     if tr is not None:
         print(f'Training model... Type={tr.type}')

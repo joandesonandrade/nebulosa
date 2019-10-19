@@ -7,11 +7,13 @@ def main():
     parser.add_argument("--preprocessing", help="--preprocessing | Processing data files", action="store_true")
     parser.add_argument("--train", help="--train | Training the model", action="store_true")
     parser.add_argument("--predict", help="--predict | Get predict the model", action="store_true")
+    parser.add_argument("--listen", help="--listen | Listen traffic flow", action="store_true")
     args = parser.parse_args()
 
     it = None
     pre = None
     tr = None
+    lt = None
 
     if args.intercept:
         from src import intercept
@@ -49,6 +51,12 @@ def main():
                 print('normal', pm.X)
             else:
                 print('anormalies', pm.X)
+
+    if args.listen:
+        from src import listen
+        interface = input("Your interface [wlan0/eth0]> ")
+        lt = listen.listen(interface)
+        lt.start()
 
 
     if tr is not None:

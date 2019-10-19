@@ -28,16 +28,32 @@ class trainer:
         return len(data) / 1024 / 1024
 
     def sort_list(self, X):
-        y = []
-        n = []
-        while (len(y) < len(X)):
-            s = np.random.randint(0, len(X))
-            if s in y:
-                continue
-            # print(X[s])
-            n.append(X[s])
-            y.append(s)
-        return n
+        data = []
+        i_a = []
+        i_b = []
+        a = [n for n in X if n[1][0] == 1]
+        b = [n for n in X if n[1][0] == 0]
+
+        step = 1
+        while len(data) < len(X):
+            if step == 1:
+                if len(i_a) > 0:
+                    i = i_a[(len(i_a) - 1)]
+                else:
+                    i = 0
+                data.append(a[i])
+                i_a.append((i + 1))
+                step = 0
+            else:
+                if len(i_b) > 0:
+                    i = i_b[(len(i_b) - 1)]
+                else:
+                    i = 0
+                data.append(b[i])
+                i_b.append((i + 1))
+                step = 1
+
+        return data
 
 
     def MODEL_KNN(self, k):
@@ -113,7 +129,7 @@ class trainer:
 
         n_features = len(ndata)
 
-        print('\nRandomly mixing data...')
+        print('\nMixing data...')
         for i in range(n_features):
             n_dst = np.random.randint(0, 999)
             n_payload = np.random.randint(1, 99)
@@ -131,34 +147,40 @@ class trainer:
                                                             np.array(y, dtype=np.float64).ravel(),
                                                             test_size=0.3,
                                                             random_state=0)
+        calc_nbest = input('Want to calculate the best n_neighbors? (yes/NO)> ')
+        if calc_nbest == 'yes':
+            print('Calculating the best n_neighbors...')
+            k_test = 26
+            k_result = []
+            for i in range(1, k_test):
+                self.knn = self.MODEL_KNN(i)
+                self.knn.fit(X=X_train, y=y_train)
+                k_result.append(accuracy_score(y_test, self.knn.predict(X_test)))
 
-        print('Calculating the best n_neighbors...')
-        k_test = 26
-        k_result = []
-        for i in range(1, k_test):
-            self.knn = self.MODEL_KNN(i)
+            k_index = 0
+            k_best = k_result[k_index]
+
+            for k in k_result:
+                if k > k_best:
+                    k_best = k
+                    k_index = k_result.index(k)
+
+            k_index = (k_index + 1)
+            acc = k_best * 100
+            print('Best Accuracy: {:.2f}%'.format(acc))
+            print('n_neighbors:', k_index)
+
+            self.knn = self.MODEL_KNN(k_index)
             self.knn.fit(X=X_train, y=y_train)
-            k_result.append(accuracy_score(y_test, self.knn.predict(X_test)))
+            print("Predict model: {:.2f}%".format(acc))
 
-        k_index = 0
-        k_best = k_result[k_index]
+        else:
+            self.knn = self.MODEL_KNN(1)
+            self.knn.fit(X=X_train, y=y_train)
+            print("Predict model: {:.2f}%".format(accuracy_score(y_test, self.knn.predict(X_test)) * 100))
 
-        for k in k_result:
-            if k > k_best:
-                k_best = k
-                k_index = k_result.index(k)
 
-        k_index = (k_index + 1)
-        acc = k_best * 100
-        print('Best Accuracy: {:.2f}%'.format(acc))
-        print('n_neighbors:', k_index)
-
-        self.knn = self.MODEL_KNN(k_index)
-        self.knn.fit(X=X_train, y=y_train)
-
-        print("Predict model: {:.2f}%".format(acc))
-
-        if input('Do you want to save the model? (yes/no)> ') == 'yes':
+        if input('Do you want to save the model? (yes/NO)> ') == 'yes':
             with open(MODEL_PATH + 'model.pkl', 'wb') as wf:
                 pickle.dump(self.knn, wf)
                 wf.close()

@@ -28,3 +28,10 @@ Execute o comando abaixo para instalar as bibliotecas necessárias.
 Caso o scapy esteja dando erro na instalação, instale esses pacotes abaixo.
 
 `sudo apt-get install libpcap-dev libpq-dev python3-dev`
+
+Executar software usando Virtual Env
+`virtualenv --no-site-packages virtualenv`
+`source ./virtualenv/bin/activate`
+`pip3 install -r requeriments.txt`
+
+###

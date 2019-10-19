@@ -1,13 +1,53 @@
-import datetime
 from threading import Thread
 import pcapy
 from impacket.ImpactDecoder import LinuxSLLDecoder, EthDecoder
 import netifaces as ni
+from src import predict_model
+
+MODEL_PATH = 'model/'
+LOGS_PATH = 'logs/'
+FAIL = '\033[91m'
+ENDC = '\033[0m'
+
+class ModelPredict:
+    def __init__(self, protocol, io, srcPort, dstPort, sumBytePayload):
+        self.protocol = protocol
+        self.io = io
+        self.srcPort = srcPort
+        self.dstPort = dstPort
+        self.sumBytePayload = sumBytePayload
+        self.predict()
+
+    def encode_protocol(self, protocol):
+        #tcp=1;udp=2;others=3
+        if protocol == 6:
+            return 1
+        elif protocol == 17:
+            return 2
+        else:
+            return 3
+
+    def encode_port(self, port):
+        #ports longer than 3 digits are irrelevant
+        if len(str(port)) > 3:
+            return 0
+        else:
+            return int(port)
+
+    def predict(self):
+        self.protocol = self.encode_protocol(self.protocol)
+        self.srcPort = self.encode_port(self.srcPort)
+        self.dstPort = self.encode_port(self.dstPort)
+        result = predict_model.predict([self.protocol, self.io, self.srcPort, self.dstPort, self.sumBytePayload])
+        result = result.get_result()
+        #LOGS = str(self.protocol) + str(self.io) + str(self.srcPort) + str(self.dstPort) + str(self.sumBytePayload)
+        with open(LOGS_PATH + 'logs.csv', 'a') as wt:
+            wt.write(',' + str(result[0]) + '\n')
+            wt.close()
 
 class DecoderThread(Thread):
-    def __init__(self, pcapObj=None, FilePath=None, Interface=None):
+    def __init__(self, pcapObj=None, Interface=None):
         datalink = pcapObj.datalink()
-        self.FilePath = FilePath
         self.Interface = Interface
         if pcapy.DLT_EN10MB == datalink:
             self.decoder = EthDecoder()
@@ -24,7 +64,6 @@ class DecoderThread(Thread):
 
     def display_hex(self, pkt):
         return pkt.get_data_as_string()
-
 
     def packetHandler(self, hdr, data):
         p = self.decoder.decode(data)
@@ -44,10 +83,8 @@ class DecoderThread(Thread):
 
         if dstPort > 0:
             sumBytePayload = sum(payload) / dstPort
-            lenPayload = len(payload) / dstPort
         else:
             sumBytePayload = sum(payload)
-            lenPayload = len(payload)
 
         try:
             protocol = tcp.protocol
@@ -70,47 +107,15 @@ class DecoderThread(Thread):
             if myAddr != ip.get_ip_dst():
                 io = 0#output
 
-        #Protocol|I/O|SrcPort|DstPort|SumPayload|LenPayload
-        LOGS = str(protocol) + '|' + str(io) + '|' + str(srcPort) + '|' + str(dstPort) + '|' + str(sumBytePayload) + '|' +\
-        str(lenPayload) + '\n'
-        with open(self.FilePath, 'a') as wf:
-            wf.write(LOGS)
-            wf.close()
+        self.model = Thread(target=ModelPredict, args=(protocol, io, srcPort, dstPort, sumBytePayload,))
+        self.model.start()
 
-class intercept:
-    def __init__(self, type=None, interface=None):
-        try:
-            if int(type) == 1:
-                type = 'normal'
-            elif int(type) == 2:
-                type = 'attack'
-            else:
-                type = 'normal'
-                print('Type was set to normal default.')
-        except ValueError:
-            raise('Invalid type [ Select number 1 to normal or 2 to attack ]')
 
+class listen:
+    def __init__(self, interface=None):
         self.interface = interface
-        self.type = type
-        self.fileName = None
-        self.timeLog = None
-        self.path = "logs/" + self.type + "/"
-        self.net = None
-        self.mask = None
-        self.datalink = None
-
-    def saveToLog(self):
-        now = datetime.datetime.now()
-        self.timeLog = str(now.day) + "-" + str(now.month) + "-" + str(now.year) + "_" + str(now.hour) + \
-                       ":" + str(now.minute) + ".log"
-        self.fileName = self.type + "-" + self.timeLog
-        return self.path + self.fileName
 
     def start(self):
-        absolutePathFile = self.saveToLog()
         cap = pcapy.open_live(self.interface, 65536, 0, 100)
-        #cap.setfilter(r'ip proto \tcp')
-        self.net = cap.getnet()
-        self.mask = cap.getmask()
-        self.datalink = cap.datalink()
-        DecoderThread(cap, absolutePathFile, self.interface).start()
+        print('Nebusola is working...')
+        DecoderThread(cap, self.interface).start()

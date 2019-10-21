@@ -10,11 +10,13 @@ FAIL = '\033[91m'
 ENDC = '\033[0m'
 
 class ModelPredict:
-    def __init__(self, protocol, io, srcPort, dstPort, sumBytePayload):
+    def __init__(self, protocol, io, srcPort, dstPort, sumBytePayload, srcIP, dstIP):
         self.protocol = protocol
         self.io = io
         self.srcPort = srcPort
         self.dstPort = dstPort
+        self.srcIP = srcIP
+        self.dstIP = dstIP
         self.sumBytePayload = sumBytePayload
         self.predict()
 
@@ -41,8 +43,13 @@ class ModelPredict:
         result = predict_model.predict([self.protocol, self.io, self.srcPort, self.dstPort, self.sumBytePayload])
         result = result.get_result()
         #LOGS = str(self.protocol) + str(self.io) + str(self.srcPort) + str(self.dstPort) + str(self.sumBytePayload)
+        if result[0] == 1:
+            result = 0
+        else:
+            result = 1
+
         with open(LOGS_PATH + 'logs.csv', 'a') as wt:
-            wt.write(',' + str(result[0]) + '\n')
+            wt.write(str(result) + ',' + str(self.srcIP) + ',' + str(self.dstIP) + '\n')
             wt.close()
 
 class DecoderThread(Thread):
@@ -70,6 +77,22 @@ class DecoderThread(Thread):
         ip = p.child()
         tcp = ip.child()
         payload = self.display_hex(p)
+
+        myAddr = ni.ifaddresses(self.Interface)[ni.AF_INET][0]['addr']
+
+        try:
+            srcIP = ip.get_ip_src()
+            if myAddr == srcIP:
+                srcIP = 0
+        except AttributeError:
+            srcIP = 0
+
+        try:
+            dstIP = ip.get_ip_dst()
+            if myAddr == dstIP:
+                dstIP = 0
+        except AttributeError:
+            dstIP = 0
 
         try:
             srcPort = tcp.get_th_sport()
@@ -107,7 +130,7 @@ class DecoderThread(Thread):
             if myAddr != ip.get_ip_dst():
                 io = 0#output
 
-        self.model = Thread(target=ModelPredict, args=(protocol, io, srcPort, dstPort, sumBytePayload,))
+        self.model = Thread(target=ModelPredict, args=(protocol, io, srcPort, dstPort, sumBytePayload, srcIP, dstIP, ))
         self.model.start()
 
 

@@ -491,7 +491,7 @@
           $("#box_maps").hide();
           $("#list_trace").hide();
           $(".button-maps").show();
-          $("#box_maps").removeClass("active");
+          //$("#box_maps").removeClass("active");
         });
       });
     </script>
@@ -523,10 +523,12 @@
     $(".button-maps").on('click', function () {
       $("#box_maps").show();
       $("#list_trace").show();
-      $(".list_tt").html("");
+      //$(".list_tt").html("");
       $(this).hide();
-      $("#box_maps").addClass("active");
-      init_map();
+      if(!$("#box_maps").hasClass("active")) {
+          init_map();
+          $("#box_maps").addClass("active");
+      }
     });
 
   </script>

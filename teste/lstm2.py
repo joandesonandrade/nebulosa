@@ -13,11 +13,10 @@ timesteps = 10
 
 model = Sequential()
 model.add(LSTM(32, return_sequences=True, input_shape=(timesteps, data_dim)))
-model.add(LSTM(32, return_sequences=True))
 model.add(Dense(1, activation='linear'))
 
 print(model.summary())
 
 model.compile(loss='mean_squared_error', optimizer='rmsprop', metrics=['accuracy'])
 
-model.fit(X,y, batch_size=1, epochs=1000)
+model.fit(X, y, batch_size=1, epochs=1000)

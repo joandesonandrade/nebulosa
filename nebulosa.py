@@ -31,14 +31,16 @@ def main():
             pre.compile()
 
     if args.train:
-        #from src import train
+        from src import train
         from src import classifier
         type = input("Enter the intercept type number [ 1- normal / 2- attack]> ")
         if type is not None:
-            #tr = train.trainer(type=type)
+            qt = train.trainer(type=type)
             tr = classifier.trainer(type=type)
-            print(f'Training model... Type={tr.type}')
+            print(f'Training model KNN... Type={tr.type}')
             tr.compile()
+            print(f'\n\nTraining model LSTM... Type={qt.type}')
+            qt.compile()
 
     if args.predict:
         from src import predict_model

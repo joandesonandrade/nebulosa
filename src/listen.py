@@ -9,8 +9,9 @@ LOGS_PATH = 'logs/'
 FAIL = '\033[91m'
 ENDC = '\033[0m'
 
+
 class ModelPredict:
-    def __init__(self, protocol, io, srcPort, dstPort, sumBytePayload, srcIP, dstIP):
+    def __init__(self, protocol, io, srcPort, dstPort, sumBytePayload, srcIP, dstIP, buffer):
         self.protocol = protocol
         self.io = io
         self.srcPort = srcPort
@@ -18,32 +19,15 @@ class ModelPredict:
         self.srcIP = srcIP
         self.dstIP = dstIP
         self.sumBytePayload = sumBytePayload
+        self.buffer_traffic = buffer
         self.predict()
 
-    def encode_protocol(self, protocol):
-        #tcp=1;udp=2;others=3
-        if protocol == 6:
-            return 1
-        elif protocol == 17:
-            return 2
-        else:
-            return 3
-
-    def encode_port(self, port):
-        #ports longer than 3 digits are irrelevant
-        if len(str(port)) > 3:
-            return 0
-        else:
-            return int(port)
-
     def predict(self):
-        self.protocol = self.encode_protocol(self.protocol)
-        self.srcPort = self.encode_port(self.srcPort)
-        self.dstPort = self.encode_port(self.dstPort)
-        result = predict_model.predict([self.protocol, self.io, self.srcPort, self.dstPort, self.sumBytePayload])
-        result = result.get_result()
-        #LOGS = str(self.protocol) + str(self.io) + str(self.srcPort) + str(self.dstPort) + str(self.sumBytePayload)
-        if result[0] == 1:
+        data = [self.protocol, self.io, self.srcPort, self.dstPort, self.sumBytePayload]
+        result = predict_model.predict(X=data, buffer=self.buffer_traffic)
+        result_knn, result_lstm = result.get_result()
+        print('lstm:', result_lstm, 'knn:', result_knn)
+        if result_knn == 1 and result_lstm > 0:
             result = 0
         else:
             result = 1
@@ -51,6 +35,7 @@ class ModelPredict:
         with open(LOGS_PATH + 'logs.csv', 'a') as wt:
             wt.write(str(result) + ',' + str(self.srcIP) + ',' + str(self.dstIP) + '\n')
             wt.close()
+
 
 class DecoderThread(Thread):
     def __init__(self, pcapObj=None, Interface=None):
@@ -64,6 +49,7 @@ class DecoderThread(Thread):
             raise Exception("Unsupported datalink type: " % datalink)
 
         self.pcap = pcapObj
+        self.buffer_traffic = []
         Thread.__init__(self)
 
     def run(self):
@@ -71,6 +57,22 @@ class DecoderThread(Thread):
 
     def display_hex(self, pkt):
         return pkt.get_data_as_string()
+
+    def encode_protocol(self, protocol):
+        # tcp=1;udp=2;others=3
+        if protocol == 6:
+            return 1
+        elif protocol == 17:
+            return 2
+        else:
+            return 3
+
+    def encode_port(self, port):
+        # ports longer than 3 digits are irrelevant
+        if len(str(port)) > 3:
+            return 0
+        else:
+            return int(port)
 
     def packetHandler(self, hdr, data):
         p = self.decoder.decode(data)
@@ -114,23 +116,39 @@ class DecoderThread(Thread):
         except AttributeError:
             return
 
-        io = 1#input
+        io = 1  # input
 
-        if protocol is None:#ARP
+        if protocol is None:  # ARP
             return
 
-        #protocol 17 = UDP
+        # protocol 17 = UDP
 
-        if protocol == 1:#ICMP
+        if protocol == 1:  # ICMP
             if tcp.get_icmp_num_addrs() > 0:
-                io = 0#output
+                io = 0  # output
 
-        if protocol == 6:#TCP
+        if protocol == 6:  # TCP
             myAddr = ni.ifaddresses(self.Interface)[ni.AF_INET][0]['addr']
             if myAddr != ip.get_ip_dst():
-                io = 0#output
+                io = 0  # output
 
-        self.model = Thread(target=ModelPredict, args=(protocol, io, srcPort, dstPort, sumBytePayload, srcIP, dstIP, ))
+        protocol = self.encode_protocol(protocol)
+        srcPort = self.encode_port(srcPort)
+        dstPort = self.encode_port(dstPort)
+
+        if len(self.buffer_traffic) > 10:
+            self.buffer_traffic = []
+
+        self.buffer_traffic.append([protocol, io, srcPort, dstPort, sumBytePayload])
+
+        self.model = Thread(target=ModelPredict, args=(protocol,
+                                                       io,
+                                                       srcPort,
+                                                       dstPort,
+                                                       sumBytePayload,
+                                                       srcIP,
+                                                       dstIP,
+                                                       self.buffer_traffic))
         self.model.start()
 
 

@@ -4,13 +4,11 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from keras.models import Sequential
-from keras.layers import Dense, LSTM, Flatten, Dropout
-from sklearn.preprocessing import MinMaxScaler
-import matplotlib.pyplot as plt
+from keras.layers import Dense, LSTM, Flatten
 
 DATA_PATH = 'data/'
 MODEL_PATH = 'model/'
-EPOCHS = 4
+EPOCHS = 2
 BATCH_SIZE = 60
 
 class trainer:
@@ -41,16 +39,12 @@ class trainer:
     def LSTM_MODEL(self, inputlstm):
         model = Sequential()
         model.add(LSTM(
-            200,
+            50,
             input_shape=inputlstm,
             return_sequences=True,
             activation='relu'))
         model.add(Flatten())
-        model.add(Dense(5, activation='relu'))
-        model.add(Dropout(0.2))
-        model.add(Dense(5, activation='relu'))
-        model.add(Dropout(0.2))
-        model.add(Dense(5, activation='softmax'))
+        model.add(Dense(1, activation='sigmoid'))
         return model
 
     def compile_model(self, model):
@@ -67,16 +61,40 @@ class trainer:
         return files
 
     def sort_list(self, X):
-        y = []
-        n = []
-        while (len(y) < len(X)):
-            s = np.random.randint(0, len(X))
-            if s in y:
-                continue
-            print(X[s])
-            n.append(X[s])
-            y.append(s)
-        return n
+        data = []
+        i_a = []
+        i_b = []
+        a = [n for n in X if n[1][0] == 1]
+        b = [n for n in X if n[1][0] == 0]
+
+        step = 1
+        while len(data) < len(X):
+            if step == 1:
+                if len(i_a) > 0:
+                    i = i_a[(len(i_a) - 1)]
+                else:
+                    i = 0
+                data.append(a[i])
+                i_a.append((i + 1))
+                step = 0
+            else:
+                if len(i_b) > 0:
+                    i = i_b[(len(i_b) - 1)]
+                else:
+                    i = 0
+                data.append(b[i])
+                i_b.append((i + 1))
+                step = 1
+
+        return data
+
+    def decode_protocol(self, protocol):
+        if protocol == 1:
+            return "TCP"
+        elif protocol == 2:
+            return "UDP"
+        else:
+            return "Others"
 
     def get_data(self, list):
         data = None
@@ -98,24 +116,48 @@ class trainer:
         return data, list[int(s)]
 
     def compile(self):
-        self.model_path = self.salveModelTo()
         self.list_files = self.list_files()
         if len(self.list_files) == 0:
             print("Path \"" + DATA_PATH + self.type + "\" is empty")
             exit()
 
         self.data = self.get_data(self.list_files)
-        print('Training {:.2f}MB of data...'.format(self.calc_bytes(self.data[0])))
+        print('Size of {:.2f}MB of datas.'.format(self.calc_bytes(self.data[0])))
 
         self.data = pd.read_csv(DATA_PATH + self.type + '/' + self.data[1]).values.tolist()
 
-        ndata = [[n[1:], [1, 1, 1, 1, 1]] for n in self.data]
+        data_n_out = [x[2] for x in self.data if x[2] == 0]
+        data_n_input = [x[2] for x in self.data if x[2] == 1]
+        data_n_proto = [self.decode_protocol(x[1]) for x in self.data]
+        data_n_src = [x[3] for x in self.data]
+        data_n_dst = [x[4] for x in self.data]
+        data_n_payload = [x[5] for x in self.data]
+
+        print('=========== STATUS ===========')
+        print("I/O: ")
+        print('Out=', len(data_n_out), '| Input=', len(data_n_input))
+        print('\nPROTOCOLS: ')
+        print(pd.DataFrame({'protocol': data_n_proto})['protocol'].value_counts())
+        print('\nSource Ports: ')
+        print(pd.DataFrame({'src': data_n_src})['src'].value_counts())
+        print('\nDestination Ports: ')
+        print(pd.DataFrame({'dst': data_n_dst})['dst'].value_counts())
+        print('\nMean of Payload: ')
+        print(pd.DataFrame({'payload': data_n_payload})['payload'].mean())
+        input('\nClick Enter to continue...')
+
+        ndata = [[n[1:], [1]] for n in self.data]
 
         n_features = len(ndata)
 
+        print('\nMixing data...')
         for i in range(n_features):
-            ndata.append([[ndata[i][0][0], ndata[i][0][1], np.random.randint(0, 999), np.random.randint(0, 999), np.random.randint(1, 99)], [0, 0, 0, 0, 0]])
-            print(ndata[(len(ndata) - 1)])
+            n_dst = np.random.randint(0, 999)
+            n_payload = np.random.randint(1, 99)
+            if n_dst > 0:
+                n_payload = n_payload / n_dst
+            ndata.append([[ndata[i][0][0], ndata[i][0][1], np.random.randint(0, 999), n_dst, n_payload], [0]])
+            # print(ndata[(len(ndata) - 1)])
 
         ndata = self.sort_list(ndata)
 
@@ -130,10 +172,10 @@ class trainer:
         X_train = np.reshape(X_train, (-1, X_train.shape[1]))
         y_train = np.reshape(y_train, (-1, y_train.shape[1]))
 
-        MinMax = MinMaxScaler(feature_range=(0, 1))
-
-        X_train = MinMax.fit_transform(X_train)
-        y_train = MinMax.fit_transform(y_train)
+        # MinMax = MinMaxScaler()
+        #
+        # X_train = MinMax.fit_transform(X_train)
+        # y_train = MinMax.fit_transform(y_train)
 
         X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
         X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
@@ -148,11 +190,12 @@ class trainer:
                       epochs=EPOCHS,
                       validation_data=(X_test, y_test))
         score, acc = self.lstm.evaluate(X_test, y_test, batch_size=BATCH_SIZE)
-        print(f'acc={acc}%; score={score}')
+        print('acc={:.2f}%; score={:.2f}'.format((acc * 100), score))
 
-        showGraph = input('Show Graph (yes/no)> ')
+        showGraph = input('Show Graph (yes/NO)> ')
 
         if showGraph == 'yes':
+            import matplotlib.pyplot as plt
             # Plot training & validation accuracy values
             plt.plot(history.history['acc'])
             plt.title('Model accuracy')
@@ -170,15 +213,17 @@ class trainer:
             plt.show()
 
 
-        # pred = np.array([[1, 0, 21, 0, 0.140006623613181]])
-        # pred = MinMax.fit_transform(pred)
+        # pred = np.array([[1,1,0,80,15], [1,1,0,80,15], [1,1,0,80,15], [1,1,0,80,15]])
+        # #pred = MinMax.fit_transform(pred)
         # pred = np.reshape(pred, (pred.shape[0], pred.shape[1], 1))
         #
+        #
+        # print("shape: ", pred.shape)
+        #
         # predicted = self.lstm.predict(pred, BATCH_SIZE, verbose=True)
-        # print(MinMax.inverse_transform(predicted))
-        # print(self.lstm.evaluate(pred, predicted, batch_size=BATCH_SIZE))
         #
         # print(np.argmax(predicted))
 
-        self.lstm.save(MODEL_PATH + 'model.h5')
-        print(f'Model successfully saved. -> {MODEL_PATH}model.h5')
+        if input('Do you want to save the model? (yes/NO)> ') == 'yes':
+            self.lstm.save(MODEL_PATH + 'model.h5')
+            print(f'Model successfully saved. -> {MODEL_PATH}model.h5')
